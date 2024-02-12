@@ -5,6 +5,8 @@ import { buildProject } from "./utils";
 const subscriber = createClient();
 subscriber.connect();
 
+const publisher = createClient();
+publisher.connect();
 async function main() {
   while (1) {
     const response = await subscriber.brPop(
@@ -18,6 +20,9 @@ async function main() {
     await downloadS3Folder(`output/${id}`);
     await buildProject(id);
     await copyFinalDist(id);
+
+    console.log(`Ready to deploy ${id}`);
+    publisher.lPush("deploy-queue", id);
   }
 }
 main();
